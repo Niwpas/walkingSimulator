@@ -10,10 +10,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float runSpeed = 6.0f;
     [SerializeField] private float gravity = -20.0f;
 
-    [Header("Ground Check")]
-    [SerializeField] private Transform groundCheck;
-    [SerializeField] private float groundDistance = 0.3f;
-    [SerializeField] private LayerMask groundMask;
+    [Header("Jump")]
     [SerializeField] private float jumpHeight = 1.5f;
     [SerializeField] private float fallMultiplier = 3f;
     private Vector3 velocity;
@@ -26,8 +23,9 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        // Continuous ground check using a small sphere at the player's feet
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        // CharacterController reports contact from its last Move call and cannot hit
+        // the player's own collider, unlike the separate ground-check sphere.
+        isGrounded = controller.isGrounded && velocity.y <= 0f;
 
         if (isGrounded && velocity.y < 0)
         {
@@ -45,13 +43,15 @@ public class PlayerController : MonoBehaviour
         // Calculate movement vector relative to player orientation
         Vector3 move = transform.right * x + transform.forward * z;
         controller.Move(move * currentSpeed * Time.deltaTime);
-if (Input.GetButtonDown("Jump") && isGrounded)
-{
-    velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
-}
+
+        if (Input.GetButtonDown("Jump") && isGrounded)
+        {
+            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        }
+
         // Apply vertical gravity velocity
         float gravityMultiplier = velocity.y < 0 ? fallMultiplier : 1f;
-velocity.y += gravity * gravityMultiplier * Time.deltaTime;
+        velocity.y += gravity * gravityMultiplier * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
     }
 }
