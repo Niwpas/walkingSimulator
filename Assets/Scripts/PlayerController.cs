@@ -23,6 +23,11 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (PlayerInventory.BagIsOpen)
+        {
+            return;
+        }
+
         // CharacterController reports contact from its last Move call and cannot hit
         // the player's own collider, unlike the separate ground-check sphere.
         isGrounded = controller.isGrounded && velocity.y <= 0f;
